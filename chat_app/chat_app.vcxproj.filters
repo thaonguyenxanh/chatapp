@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="View">
+      <UniqueIdentifier>{4d141963-d610-4991-a14a-feb018818442}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Controller">
+      <UniqueIdentifier>{823f294c-7d90-4ebd-ad8f-1cf81dd1da38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model">
+      <UniqueIdentifier>{7e0578dc-cb91-4bdc-b0cb-90566528a6b3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="sqlite3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sqlite3ext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="users.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="users_management.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLLite.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="friend_list.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="message.h">
+      <Filter>Model</Filter>
+    </ClInclude>
+    <ClInclude Include="message_management.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="friend_list_management.h">
+      <Filter>Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="shell.c">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sqlite3.c">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SQLLite.cpp">
+      <Filter>Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="Source.cpp">
+      <Filter>View</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="chatapp.db">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="chat_app.rc">
+      <Filter>View</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
