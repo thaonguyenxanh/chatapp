@@ -68,7 +68,6 @@ inline int users_management::login()
 	{
 		cout << "log in successfully!" << endl;
 	}
-	pSQLite->CloseConnection();
 	return i;
 }
 
@@ -107,8 +106,9 @@ inline int users_management::sign_up()
 					strValue << a;
 					strValue >> i;
 				}
-				res->Release();
 			}
+			res->Release();
+
 			if (i) {
 				cout << "username: " << username << " has existed" << endl;
 				continue;
@@ -142,7 +142,6 @@ inline int users_management::sign_up()
 			}
 		}	
 	}
-	pSQLite->CloseConnection();
 
 }
 

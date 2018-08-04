@@ -133,7 +133,7 @@ const char*  SQLiteDB::ColomnData(int clmNum)
 
 void SQLiteDB::Release()
 {
-	//sqlite3_reset(pSQLiteConn->pRes);
+	sqlite3_reset(pSQLiteConn->pRes);
 	sqlite3_finalize(pSQLiteConn->pRes);
 	m_iColumnCount = 0;
 	m_strLastError = "";

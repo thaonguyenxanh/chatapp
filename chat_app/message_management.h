@@ -23,7 +23,11 @@ public:
 public:
 	void display_all_message(int id);
 	void display_message();
+	void display_all_read_msg();
+	int has_not_been_read();
 	void send_message();
+	void send_message(int user1, int user2);
+	
 public:
 	message_management();
 	~message_management();
@@ -66,7 +70,6 @@ inline void message_management::display_all_message(int id)
 			}
 		}
 		res->Release();
-		pSQLite->CloseConnection();
 	}
 
 }
@@ -109,8 +112,83 @@ inline void message_management::display_message()
 			}
 		}
 		res->Release();
-		pSQLite->CloseConnection();
 	}
+}
+
+inline void message_management::display_all_read_msg()
+{
+	string query = "select distinct message.id,message.receiver,message.sender,message.contents,message.time from message, users where message.status= 0;";
+	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
+		cout << "Unable to connect database" << endl;
+		cout << pSQLite->GetLastError().c_str() << endl;
+	}
+	else
+	{
+		IResult *res = pSQLite->ExcuteSelect(query.c_str());
+		if (!res)
+		{
+			cout << "Error: " << pSQLite->GetLastError().c_str();
+			cout << endl;
+		}
+		else
+		{
+			int i = res->GetColumnCount();
+			for (int k = 0; k < i; k++)
+			{
+				printf("%s\t", res->NextColomnName(k));
+			}
+			cout << endl;
+			while (res->Next())
+			{
+				for (int k = 0; k < i; k++)
+				{
+					printf("%s\t", res->ColomnData(k));
+				}
+				cout << endl;
+			}
+		}
+		res->Release();
+	}
+}
+
+	inline int message_management::has_not_been_read()
+{
+	int count = 0;
+	string query = "select distinct message.id, message.receiver, message.sender, message.contents, message.time from message, users where message.status= 1;";
+	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
+		cout << "Unable to connect database" << endl;
+		cout << pSQLite->GetLastError().c_str() << endl;
+	}
+	else
+	{
+		IResult *res = pSQLite->ExcuteSelect(query.c_str());
+		if (!res)
+		{
+			cout << "Error: " << pSQLite->GetLastError().c_str();
+			cout << endl;
+		}
+		else
+		{
+			int i = res->GetColumnCount();
+			for (int k = 0; k < i; k++)
+			{
+				printf("%s\t", res->NextColomnName(k));
+			}
+			cout << endl;
+			while (res->Next())
+			{
+				for (int k = 0; k < i; k++)
+				{
+					printf("%s\t", res->ColomnData(k));
+
+				}
+				count++;
+				cout << endl;
+			}
+		}
+		res->Release();
+	}
+	return count;
 }
 
 inline void message_management::send_message()
@@ -118,7 +196,7 @@ inline void message_management::send_message()
 	string contents;
 	string username;
 	message msg;
-	again:
+again:
 	cout << "Enter user name to send message: " << endl;
 	cin.ignore();
 	getline(cin, username);
@@ -146,34 +224,58 @@ inline void message_management::send_message()
 			}
 		}
 		res->Release();
-	}
-	if (!i) {
-		cout << "no one has user name: " << username << endl;
-		goto again;
-	}
-	else {
-		cout << "Enter something that's so sweet to send " << username << endl;
-		getline(cin, content);
-		time_t time_now = time(0);
-		char *t = ctime(&time_now);
-		t[strlen(t)-1] = '\0';
-			
-		string query2 = "insert into message(sender,receiver,contents,time) values("+to_string(i)+",(select distinct users.id from users where users.username= '" + username + "'),'" + content + "', '" + t + "');";
-		bool a =pSQLite->isConnected();
-		if (!a) {
-			cout << "database is disconnected!" << endl;
+		if (!i) {
+			cout << "no one has user name: " << username << endl;
+			goto again;
 		}
-		else
-		{
-			int rc = pSQLite->Excute(query2.c_str());
-			if (rc > 0) {
-				cout << "sent successfully!" << endl;
+		else {
+			cout << "Enter something that's so sweet to send " << username << endl;
+			getline(cin, content);
+			time_t time_now = time(0);
+			char *t = ctime(&time_now);
+			t[strlen(t) - 1] = '\0';
+
+			string query2 = "insert into message(sender,receiver,contents,time) values(" + to_string(i) + ",(select distinct users.id from users where users.username= '" + username + "'),'" + content + "', '" + t + "');";
+			bool a = pSQLite->isConnected();
+			if (!a) {
+				cout << "database is disconnected!" << endl;
 			}
 			else
 			{
-				string err = pSQLite->GetLastError().c_str();
-				cout << err<<endl;
+				int rc = pSQLite->Excute(query2.c_str());
+				if (rc > 0) {
+					cout << "sent successfully!" << endl;
+				}
+				else
+				{
+					string err = pSQLite->GetLastError().c_str();
+					cout << err << endl;
+				}
 			}
+		}
+	}
+}
+
+inline void message_management::send_message(int user1, int user2)
+{
+	time_t time_now = time(0);
+	char *t = ctime(&time_now);
+	t[strlen(t) - 1] = '\0';
+	string query2 = "insert into message(sender,receiver,contents,time) values(" + to_string(user1) + ",(select distinct users.id from users where users.id= '" + to_string(user2) + "'),'" + content + "', '" + t + "');";
+	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
+		cout << "Unable to connect database" << endl;
+		cout << pSQLite->GetLastError().c_str() << endl;
+	}
+	else
+	{
+		int rc = pSQLite->Excute(query2.c_str());
+		if (rc > 0) {
+			cout << "sent successfully!" << endl;
+		}
+		else
+		{
+			string err = pSQLite->GetLastError().c_str();
+			cout << err << endl;
 		}
 	}
 }

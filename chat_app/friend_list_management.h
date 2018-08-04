@@ -18,9 +18,10 @@ public:
 	bool blocked = fr.get_status();
 	unsigned int period = fr.get_period();
 	void add_friend();
-	void display_friend_list(int id);
+	int display_friend_list(int id);
 	void block_user();
 	void modify_friend();
+	void rich_view(int id);
 public:
 	friend_list_management();
 	~friend_list_management();
@@ -58,83 +59,79 @@ again:
 				strValue >> i;
 			}
 			res->Release();
-		}
-
-	}
-
-	if (!i) {
-		cout << "no one has user name: " << username << endl;
-		goto again;
-	}
-	else
-	{
-		string query = " select * from friend_list,users where users.id = " + to_string(i) + " and users.id= friend_list.user2;";
-		int j = 0;
-		IResult *res1 = pSQLite->ExcuteSelect(query.c_str());
-		if (!res1) {
-			cout << "Error: " << pSQLite->GetLastError().c_str();
-		}
-		else
-		{
-			while (res1->Next())
+			if (!i) {
+				cout << "no one has user name: " << username << endl;
+				goto again;
+			}
+			else
 			{
-				j = (int)res1->ColomnData(0);
-				const char* a = res1->ColomnData(0);
-				stringstream strValue;
-				strValue << a;
-				strValue >> j;
-			}
-			res1->Release();
-		}
-		if (j) {
-			cout << "username :" << username << " had been your friend" << endl;
-		}
-		else
-		{
-			if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
-				cout << "Unable to connect database" << endl;
-				cout << pSQLite->GetLastError().c_str() << endl;
-			}
-			else {
-				time_t now;
-				struct tm newyear;
-				double seconds;
-
-				time(&now);  /* get current time; same as: now = time(NULL)  */
-
-				newyear = *localtime(&now);
-
-				newyear.tm_hour = 0; newyear.tm_min = 0; newyear.tm_sec = 0;
-				newyear.tm_mon = 0;  newyear.tm_mday = 1;
-
-				seconds = difftime(now, mktime(&newyear));//from 2000s
-
-				string query2 = "insert into friend_list(user1, user2, period) values(" + to_string(i) + ",(select users.id from users where users.username= '" + username + "')," + to_string((unsigned int)seconds) + ");";
-				bool a = pSQLite->isConnected();
-				if (!a) {
-					cout << "database disconnected!" << endl;
+				string query = " select * from friend_list,users where users.id = " + to_string(i) + " and users.id= friend_list.user2;";
+				int j = 0;
+				IResult *res1 = pSQLite->ExcuteSelect(query.c_str());
+				if (!res1) {
+					cout << "Error: " << pSQLite->GetLastError().c_str();
 				}
 				else
 				{
+					while (res1->Next())
+					{
+						j = (int)res1->ColomnData(0);
+						const char* a = res1->ColomnData(0);
+						stringstream strValue;
+						strValue << a;
+						strValue >> j;
+					}
+					res1->Release();
+				}
+				if (j) {
+					cout << "username :" << username << " had been your friend" << endl;
+				}
+				else
+				{
+					time_t now;
+					struct tm newyear;
+					double seconds;
 
-					int rc = pSQLite->Excute(query2.c_str());
-					a = pSQLite->isConnected();
-					if (rc > 0) {
-						cout << "add friend successfully!" << endl;
+					time(&now);  /* get current time; same as: now = time(NULL)  */
+
+					newyear = *localtime(&now);
+
+					newyear.tm_hour = 0; newyear.tm_min = 0; newyear.tm_sec = 0;
+					newyear.tm_mon = 0;  newyear.tm_mday = 1;
+
+					seconds = difftime(now, mktime(&newyear));//from 2000s
+
+					string query2 = "insert into friend_list(user1, user2, period) values(" + to_string(i) + ",(select users.id from users where users.username= '" + username + "')," + to_string((unsigned int)seconds) + ");";
+					bool a = pSQLite->isConnected();
+					if (!a) {
+						cout << "database disconnected!" << endl;
 					}
 					else
 					{
-						string err = pSQLite->GetLastError().c_str();
-						cout << err << endl;
+
+						int rc = pSQLite->Excute(query2.c_str());
+						a = pSQLite->isConnected();
+						if (rc > 0) {
+							cout << "add friend successfully!" << endl;
+						}
+						else
+						{
+							string err = pSQLite->GetLastError().c_str();
+							cout << err << endl;
+						}
 					}
 				}
 			}
 		}
+
 	}
+
+	
 }
 
-inline void friend_list_management::display_friend_list(int id)
+inline int friend_list_management::display_friend_list(int id)
 {
+	int count = 0;
 	string query = "select friend_list.id, friend_list.user2, friend_list.period from friend_list, users where users.id= " + to_string(id) + " and (users.id= friend_list.user1) and friend_list.blocked =1;";
 	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
 		cout << "Unable to connect database" << endl;
@@ -161,13 +158,16 @@ inline void friend_list_management::display_friend_list(int id)
 				for (int k = 0; k < i; k++)
 				{
 					printf("%s\t", res2->ColomnData(k));
-
+					
 				}
+				count++;
 				cout << endl;
 			}
-			res2->Release();
-		}
+		}	
+		res2->Release();
+
 	}
+	return count;
 }
 
 inline void friend_list_management::block_user()
@@ -209,25 +209,19 @@ inline void friend_list_management::block_user()
 	}
 	else
 	{
-		if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
-			cout << "Unable to connect database" << endl;
-			cout << pSQLite->GetLastError().c_str() << endl;
+		int rc = pSQLite->Excute(query.c_str());
+		if (rc > 0) {
+			cout << "Block success!" << endl;
 		}
 		else {
-			int rc = pSQLite->Excute(query.c_str());
-			if (rc > 0) {
-				cout << "Block success!" << endl;
-			}
-			else {
-				cout << pSQLite->GetLastError().c_str();
-				cout << endl;
-			}
+			cout << pSQLite->GetLastError().c_str();
+			cout << endl;
 		}
 	}
 	pSQLite->CloseConnection();
 }
 
-inline void friend_list_management::modify_friend()
+inline void friend_list_management::modify_friend()	
 {
 	string fr_name;
 	int i = 0;
@@ -235,8 +229,9 @@ again:
 	cout << "Type your friend name to modify information: " << endl;
 	getline(cin, fr_name);
 	string query = "select users.id from users where users.username= '" + fr_name + "';";
-	if (!pSQLite->isConnected()) {
-		cout << "database is disconnected" << endl;
+	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
+		cout << "Unable to connect database" << endl;
+		cout << pSQLite->GetLastError().c_str() << endl;
 	}
 	else
 	{
@@ -272,24 +267,23 @@ again:
 		}
 		else
 		{
-			if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
-				cout << "Unable to connect database" << endl;
-				cout << pSQLite->GetLastError().c_str() << endl;
+			int rc = pSQLite->Excute(query2.c_str());
+			if (rc > 0) {
+				cout << "Modify success!" << endl;
 			}
 			else {
-				int rc = pSQLite->Excute(query.c_str());
-				if (rc > 0) {
-					cout << "Modify success!" << endl;
-				}
-				else {
-					cout << pSQLite->GetLastError().c_str();
-					cout << endl;
-				}
+				cout << pSQLite->GetLastError().c_str();
+				cout << endl;
 			}
 		}
-
 	}
 
+}
+
+inline void friend_list_management::rich_view(int id)
+{
+	string query = "select distinct users.address from users, friend_list where users.id= friend_list.user1 and users.id= "+to_string(id)+";";
+	
 }
 
 friend_list_management::friend_list_management()
