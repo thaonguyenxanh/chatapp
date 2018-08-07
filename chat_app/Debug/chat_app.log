@@ -1,2 +1,3 @@
 ﻿  Source.cpp
+c:\users\8570w\source\repos\chat_app\chat_app\users_management.h(71): warning C4715: 'users_management::login': not all control paths return a value
   chat_app.vcxproj -> C:\Users\8570w\source\repos\chat_app\Debug\chat_app.exe

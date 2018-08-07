@@ -5,6 +5,7 @@
 #include<ctime>
 #include"friend_list.h"
 #include<sstream>
+#include<vector>
 #pragma warning(disable:4996)
 using namespace std;
 class friend_list_management: public friend_list
@@ -227,6 +228,7 @@ inline void friend_list_management::modify_friend()
 	int i = 0;
 again:
 	cout << "Type your friend name to modify information: " << endl;
+	cin.ignore();
 	getline(cin, fr_name);
 	string query = "select users.id from users where users.username= '" + fr_name + "';";
 	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
@@ -282,8 +284,79 @@ again:
 
 inline void friend_list_management::rich_view(int id)
 {
-	string query = "select distinct users.address from users, friend_list where users.id= friend_list.user1 and users.id= "+to_string(id)+";";
-	
+	vector<string> address;
+	string query = "select distinct users.address from users, friend_list where friend_list.user1= users.id or friend_list.user2= users.id and users.id= "+to_string(id)+";";
+	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
+		cout << "Unable to connect database" << endl;
+		cout << pSQLite->GetLastError().c_str() << endl;
+	}
+	else
+	{
+		IResult *res = pSQLite->ExcuteSelect(query.c_str());
+		if (!res) {
+			cout << "Error: " << pSQLite->GetLastError().c_str();
+		}
+		else
+		{
+			int i = res->GetColumnCount();
+			while (res->Next())
+			{
+				for (int k = 0; k < i; k++)
+				{
+					const char *addr = res->ColomnData(k);
+					string addr2 = addr;
+					//printf("\t\t\t\t\%s\n", addr);
+					address.push_back(addr2);
+					/*string query2= "select distinct users.username from users, friend_list where friend_list.user1= users.id or friend_list.user2= users.id and users.address= '" + addr2 + "' and users.id= "+ to_string(id)+";";
+					IResult *res2 = pSQLite->ExcuteSelect(query2.c_str());
+					if (!res2) {
+						cout << "Error: " << pSQLite->GetLastError().c_str();
+						cout << endl;
+					}
+					else
+					{
+						int j = res2->GetColumnCount();
+						while (res2->Next())
+						{
+							for (int e = 0; e < j; e++)
+							{
+								printf("%s\n", res2->ColomnData(e));
+							}
+							cout << endl;
+						}
+					}
+					res2->Release();*/
+				}
+				cout << endl;
+			}
+			vector<string>::iterator it;
+			for ( it = address.begin(); it != address.end(); it++)
+			{
+				cout <<"\t\t\t\t"<< *it << endl;
+				string query2= "select distinct users.username from users, friend_list where friend_list.user1 = users.id or friend_list.user2 = users.id and users.address = '" + *it + "' and users.id = "+ to_string(id)+"; ";
+				IResult *res2 = pSQLite->ExcuteSelect(query2.c_str());
+				if (!res2) {
+					cout << "Error: " << pSQLite->GetLastError().c_str();
+					cout << endl;
+				}
+				else
+				{
+					int j = res2->GetColumnCount();
+					while (res2->Next())
+					{
+						for (int e = 0; e < j; e++)
+						{
+							printf("%s\n", res2->ColomnData(e));
+						}
+						cout << endl;
+					}
+					res2->Release();
+				}
+
+			}
+		}
+		res->Release();
+	}
 }
 
 friend_list_management::friend_list_management()

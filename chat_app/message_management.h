@@ -261,6 +261,10 @@ inline void message_management::send_message(int user1, int user2)
 	time_t time_now = time(0);
 	char *t = ctime(&time_now);
 	t[strlen(t) - 1] = '\0';
+	string content;
+	cout << "type something that's sweet to your friend" << endl;
+	cin.ignore();
+	getline(cin, content);
 	string query2 = "insert into message(sender,receiver,contents,time) values(" + to_string(user1) + ",(select distinct users.id from users where users.id= '" + to_string(user2) + "'),'" + content + "', '" + t + "');";
 	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
 		cout << "Unable to connect database" << endl;

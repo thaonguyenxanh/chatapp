@@ -56,7 +56,6 @@ inline int users_management::login()
 				stringstream strValue;
 				strValue << a;
 				strValue >> i;
-				return i;
 			}
 		}
 		res->Release();
@@ -67,8 +66,8 @@ inline int users_management::login()
 	else
 	{
 		cout << "log in successfully!" << endl;
+		return i;
 	}
-	return i;
 }
 
 inline int users_management::sign_up()
