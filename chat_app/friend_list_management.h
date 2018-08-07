@@ -305,27 +305,7 @@ inline void friend_list_management::rich_view(int id)
 				{
 					const char *addr = res->ColomnData(k);
 					string addr2 = addr;
-					//printf("\t\t\t\t\%s\n", addr);
 					address.push_back(addr2);
-					/*string query2= "select distinct users.username from users, friend_list where friend_list.user1= users.id or friend_list.user2= users.id and users.address= '" + addr2 + "' and users.id= "+ to_string(id)+";";
-					IResult *res2 = pSQLite->ExcuteSelect(query2.c_str());
-					if (!res2) {
-						cout << "Error: " << pSQLite->GetLastError().c_str();
-						cout << endl;
-					}
-					else
-					{
-						int j = res2->GetColumnCount();
-						while (res2->Next())
-						{
-							for (int e = 0; e < j; e++)
-							{
-								printf("%s\n", res2->ColomnData(e));
-							}
-							cout << endl;
-						}
-					}
-					res2->Release();*/
 				}
 				cout << endl;
 			}

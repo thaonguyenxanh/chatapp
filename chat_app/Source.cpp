@@ -48,7 +48,8 @@ int main(int argc, TCHAR* argv[]) {
 				cout << "choose from 1 to 7" << endl;
 				cout << "Enter Ctr_l to display friendlist" << endl;
 				cout << "Enter Ctr_R to display all message had not been read : " << endl;
-				cout << "Enter ctr_O to order friendList by address and username" << endl << endl;
+				cout << "Enter ctr_O to order friendList by address and username" << endl;
+				cout << "Enter Ctr_B to back" << endl << endl;
 				char ch=' ';
 				//cin.ignore();
 				fflush(stdin);
@@ -89,38 +90,53 @@ int main(int argc, TCHAR* argv[]) {
 					fr.rich_view(i);
 					
 				}
+				else if (ch == 2) {
+					break;
+				}
 				else
 				{
-					cin >> a2;
-					switch (a2)
-					{
-					case 1:
-						mm.display_all_message(i);
-						break;
-					case 2:
-						mm.display_message();
-						break;
-					case 3:
-						mm.send_message();
-						break;
-					case 4:
-						fr.add_friend();
-						break;
-					case 5:
-						fr.display_friend_list(i);
-						break;
-					case 6:
-						fr.block_user();
-						break;
-					case 7:
-						fr.modify_friend();
-						break;
-					case 8:
-						return 0;
-						break;
-					default:
+					char ch2;
+					cin.ignore();
+					ch2 = getch();
+					if (ch2 == 2) {
 						break;
 					}
+					else
+					{
+
+						cin >> a2;
+						switch (a2)
+						{
+						case 1:
+							mm.display_all_message(i);
+							break;
+						case 2:
+							mm.display_message();
+							break;
+						case 3:
+							mm.send_message();
+							break;
+						case 4:
+							fr.add_friend();
+							break;
+						case 5:
+							fr.display_friend_list(i);
+							break;
+						case 6:
+							fr.block_user();
+							break;
+						case 7:
+							fr.modify_friend();
+							break;
+						case 8:
+							return 0;
+							break;
+						default:
+							break;
+						}
+					}
+					
+					
 				}
 
 				fflush(stdin);
