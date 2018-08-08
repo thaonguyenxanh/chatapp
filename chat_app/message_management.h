@@ -21,6 +21,8 @@ public:
 	char *time_c=msg.get_time_c();
 
 public:
+	int check_user(string username);
+	int check_friend(int friend_id);
 	void display_all_message(int id);
 	void display_message();
 	void display_all_read_msg();
@@ -34,6 +36,67 @@ public:
 };
 
 
+
+inline int message_management::check_user(string username)
+{
+	int i = 0;
+	string query = "select * from users where users.username= '" + username + "';";
+	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
+		cout << "Unable to connect database" << endl;
+		cout << pSQLite->GetLastError().c_str() << endl;
+	}
+	else
+	{
+		IResult *res = pSQLite->ExcuteSelect(query.c_str());
+		if (!res) {
+			cout << "Error: " << pSQLite->GetLastError().c_str();
+		}
+		else
+		{
+			while (res->Next())
+			{
+				i = (int)res->ColomnData(0);
+				const char* a = res->ColomnData(0);
+				stringstream strValue;
+				strValue << a;
+				strValue >> i;
+			}
+			res->Release();
+			if (!i) {
+				cout << "no one has user name: " << username << endl;
+				return 0;
+			}
+			else
+			{
+				return i;
+			}
+		}
+	}
+}
+
+inline int message_management::check_friend(int friend_id)
+{
+	string query = " select * from friend_list,users where users.id = " + to_string(friend_id) + " and users.id= friend_list.user2 or users.id= friend_list.user1;";
+	int j = 0;
+	IResult *res1 = pSQLite->ExcuteSelect(query.c_str());
+	if (!res1) {
+		cout << "Error: " << pSQLite->GetLastError().c_str();
+		return 0;
+	}
+	else
+	{
+		while (res1->Next())
+		{
+			j = (int)res1->ColomnData(0);
+			const char* a = res1->ColomnData(0);
+			stringstream strValue;
+			strValue << a;
+			strValue >> j;
+		}
+		res1->Release();
+		return 1;
+	}
+}
 
 inline void message_management::display_all_message(int id)
 {
@@ -63,10 +126,8 @@ inline void message_management::display_all_message(int id)
 				for (int k = 0; k < i; k++)
 				{
 					printf("%s\t\t", res->ColomnData(k));
-
 				}
 				cout << endl;
-
 			}
 		}
 		res->Release();
@@ -80,13 +141,14 @@ inline void message_management::display_message()
 	cout << "Type username you wanna display all msg: " << endl;
 	cin.ignore();
 	getline(cin, username);
-	string query = "select distinct message.id,message.receiver,message.sender,message.contents,message.time from message, users where message.receiver=(select message.id from message, users where users.username= '" + username + "' and (message.receiver= users.id));";
+	string query = "select distinct message.id,message.receiver,message.sender,message.contents,message.time from message, users where (message.receiver=(select message.id from message, users where users.username= '" + username + "' or message.sender=(select message.id from message, users where users.username= '" + username + "')) and (message.receiver= users.id or message.sender= users.id));";
 	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
 		cout << "Unable to connect database" << endl;
 		cout << pSQLite->GetLastError().c_str() << endl;
 	}
 	else
 	{
+
 		IResult *res = pSQLite->ExcuteSelect(query.c_str());
 		if (!res)
 		{
@@ -208,22 +270,7 @@ again:
 	}
 	else
 	{
-		IResult *res = pSQLite->ExcuteSelect(query.c_str());
-		if (!res) {
-			cout << "Error: " << pSQLite->GetLastError().c_str();
-		}
-		else
-		{
-			while (res->Next())
-			{
-				i = (int)res->ColomnData(0);
-				const char* a = res->ColomnData(0);
-				stringstream strValue;
-				strValue << a;
-				strValue >> i;
-			}
-		}
-		res->Release();
+		i = check_user(username);
 		if (!i) {
 			cout << "no one has user name: " << username << endl;
 			goto again;
@@ -253,6 +300,23 @@ again:
 				}
 			}
 		}
+		/*IResult *res = pSQLite->ExcuteSelect(query.c_str());
+		if (!res) {
+			cout << "Error: " << pSQLite->GetLastError().c_str();
+		}
+		else
+		{
+			while (res->Next())
+			{
+				i = (int)res->ColomnData(0);
+				const char* a = res->ColomnData(0);
+				stringstream strValue;
+				strValue << a;
+				strValue >> i;
+			}
+		}
+		res->Release();*/
+		
 	}
 }
 
@@ -265,13 +329,14 @@ inline void message_management::send_message(int user1, int user2)
 	cout << "type something that's sweet to your friend" << endl;
 	cin.ignore();
 	getline(cin, content);
-	string query2 = "insert into message(sender,receiver,contents,time) values(" + to_string(user1) + ",(select distinct users.id from users where users.id= '" + to_string(user2) + "'),'" + content + "', '" + t + "');";
+	string query2 = "insert into message(sender,receiver,contents,time) values(" + to_string(user1) + "," + to_string(user2) + ",'" + content + "', '" + t + "');";
 	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
 		cout << "Unable to connect database" << endl;
 		cout << pSQLite->GetLastError().c_str() << endl;
 	}
 	else
 	{
+		int i = 0;
 		int rc = pSQLite->Excute(query2.c_str());
 		if (rc > 0) {
 			cout << "sent successfully!" << endl;

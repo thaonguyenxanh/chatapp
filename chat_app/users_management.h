@@ -9,7 +9,7 @@ class users_management:public users
 {
 
 	users user;
-	
+	int check_user(string username);
 	string address = user.get_address();
 	string email = user.get_email();
 	string password = user.get_password();
@@ -24,6 +24,43 @@ public:
 };
 
 
+
+inline int users_management::check_user(string username)
+{
+	int i = 0;
+	string query = "select * from users where users.username= '" + username + "';";
+	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
+		cout << "Unable to connect database" << endl;
+		cout << pSQLite->GetLastError().c_str() << endl;
+	}
+	else
+	{
+		IResult *res = pSQLite->ExcuteSelect(query.c_str());
+		if (!res) {
+			cout << "Error: " << pSQLite->GetLastError().c_str();
+		}
+		else
+		{
+			while (res->Next())
+			{
+				i = (int)res->ColomnData(0);
+				const char* a = res->ColomnData(0);
+				stringstream strValue;
+				strValue << a;
+				strValue >> i;
+			}
+			res->Release();
+			if (!i) {
+				cout << "no one has user name: " << username << endl;
+				return 0;
+			}
+			else
+			{
+				return i;
+			}
+		}
+	}
+}
 
 inline int users_management::login()
 {
@@ -80,9 +117,18 @@ inline int users_management::sign_up()
 	string tempt_password;
 	while (1)
 	{
+	tryagain:
 		cout << "Username: " << endl;
 		cin.ignore();  
 		getline(cin, username);
+		for (int j = 0; j < username.length(); j++)
+		{
+			if (username[j] == ' ') {
+				cout << "user name doesnot have sqace" << endl;
+				goto tryagain;
+			}
+
+		}
 		int i = 0;
 		string query = "select *from users where users.username= '" + username + "';";
 		if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
@@ -91,23 +137,7 @@ inline int users_management::sign_up()
 		}
 		else
 		{
-			IResult *res = pSQLite->ExcuteSelect(query.c_str());
-			if (!res) {
-				cout << "Error: " << pSQLite->GetLastError().c_str();
-			}
-			else
-			{
-				while (res->Next())
-				{
-					i = (int)res->ColomnData(0);
-					const char* a = res->ColomnData(0);
-					stringstream strValue;
-					strValue << a;
-					strValue >> i;
-				}
-			}
-			res->Release();
-
+			i = check_user(username);
 			if (i) {
 				cout << "username: " << username << " has existed" << endl;
 				continue;
@@ -137,11 +167,10 @@ inline int users_management::sign_up()
 				if (rc == 0) {
 					cout << pSQLite->GetLastError();
 				}
-				return 0;
 			}
 		}	
 	}
-
+	return 0;
 }
 
 inline void users_management::log_out()
