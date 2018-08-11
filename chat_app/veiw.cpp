@@ -109,7 +109,7 @@ int main(int argc, TCHAR* argv[]) {
 								mm.display_message();
 								break;
 							case 3:
-								mm.send_message();
+								mm.send_message(i);
 								break;
 							case 4:
 								fr.add_friend(i);

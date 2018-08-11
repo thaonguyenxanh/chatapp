@@ -27,7 +27,7 @@ public:
 	void display_message();
 	void display_all_read_msg();
 	int has_not_been_read();
-	void send_message();
+	void send_message(int id);
 	void send_message(int user1, int user2);
 	
 public:
@@ -100,7 +100,7 @@ inline int message_management::check_friend(int friend_id)
 
 inline void message_management::display_all_message(int id)
 {
-	string query = "select message.id,message.receiver,message.sender,message.contents,message.time from message, users where users.id= " + to_string(id) + " and (message.receiver= users.id or message.sender= users.id);";
+	string query = "select message.id,message.receiver,message.sender,message.contents,message.time from message, users where users.id= " + to_string(id) + " and (message.receiver= users.id or message.sender= users.id) order by  message.time_by_seconds desc;";
 	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
 		cout << "Unable to connect database" << endl;
 		cout << pSQLite->GetLastError().c_str() << endl;
@@ -141,7 +141,7 @@ inline void message_management::display_message()
 	cout << "Type username you wanna display all msg: " << endl;
 	cin.ignore();
 	getline(cin, username);
-	string query = "select distinct message.id,message.receiver,message.sender,message.contents,message.time from message, users where (message.receiver=(select message.id from message, users where users.username= '" + username + "' or message.sender=(select message.id from message, users where users.username= '" + username + "')) and (message.receiver= users.id or message.sender= users.id));";
+	string query = "select distinct message.id,message.receiver,message.sender,message.contents,message.time from message, users where (users.id=(select users.id from users where users.username= '"+username+"') and (message.receiver= users.id)) order by message.time_by_seconds desc;";
 	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
 		cout << "Unable to connect database" << endl;
 		cout << pSQLite->GetLastError().c_str() << endl;
@@ -179,7 +179,7 @@ inline void message_management::display_message()
 
 inline void message_management::display_all_read_msg()
 {
-	string query = "select distinct message.id,message.receiver,message.sender,message.contents,message.time from message, users where message.status= 0;";
+	string query = "select distinct message.id,message.receiver,message.sender,message.contents,message.time from message where message.status= 0 order by message.time_by_seconds desc;";
 	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
 		cout << "Unable to connect database" << endl;
 		cout << pSQLite->GetLastError().c_str() << endl;
@@ -216,7 +216,7 @@ inline void message_management::display_all_read_msg()
 	inline int message_management::has_not_been_read()
 {
 	int count = 0;
-	string query = "select distinct message.id, message.receiver, message.sender, message.contents, message.time from message, users where message.status= 1;";
+	string query = "select distinct message.id, message.receiver, message.sender, message.contents, message.time from message where message.status= 1 order by message.time_by_seconds desc;";
 	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
 		cout << "Unable to connect database" << endl;
 		cout << pSQLite->GetLastError().c_str() << endl;
@@ -253,11 +253,25 @@ inline void message_management::display_all_read_msg()
 	return count;
 }
 
-inline void message_management::send_message()
+inline void message_management::send_message(int id)
 {
 	string contents;
 	string username;
 	message msg;
+	time_t time_now = time(0);
+	char *t = ctime(&time_now);
+	time_t now;
+	struct tm newyear;
+	double seconds;
+
+	time(&now);  /* get current time; same as: now = time(NULL)  */
+
+	newyear = *localtime(&now);
+
+	newyear.tm_hour = 0; newyear.tm_min = 0; newyear.tm_sec = 0;
+	newyear.tm_mon = 0;  newyear.tm_mday = 1;
+
+	seconds = difftime(now, mktime(&newyear));//from 2000s
 again:
 	cout << "Enter user name to send message: " << endl;
 	cin.ignore();
@@ -282,7 +296,7 @@ again:
 			char *t = ctime(&time_now);
 			t[strlen(t) - 1] = '\0';
 
-			string query2 = "insert into message(sender,receiver,contents,time) values(" + to_string(i) + ",(select distinct users.id from users where users.username= '" + username + "'),'" + content + "', '" + t + "');";
+			string query2 = "insert into message(sender,receiver,contents,time,time_by_seconds) values(" + to_string(id) + ","+to_string(i)+",'" + content + "', '" + t + "'," + to_string((int)seconds) + ");";
 			bool a = pSQLite->isConnected();
 			if (!a) {
 				cout << "database is disconnected!" << endl;
@@ -300,23 +314,6 @@ again:
 				}
 			}
 		}
-		/*IResult *res = pSQLite->ExcuteSelect(query.c_str());
-		if (!res) {
-			cout << "Error: " << pSQLite->GetLastError().c_str();
-		}
-		else
-		{
-			while (res->Next())
-			{
-				i = (int)res->ColomnData(0);
-				const char* a = res->ColomnData(0);
-				stringstream strValue;
-				strValue << a;
-				strValue >> i;
-			}
-		}
-		res->Release();*/
-		
 	}
 }
 
@@ -324,12 +321,24 @@ inline void message_management::send_message(int user1, int user2)
 {
 	time_t time_now = time(0);
 	char *t = ctime(&time_now);
+	time_t now;
+	struct tm newyear;
+	double seconds;
+
+	time(&now);  /* get current time; same as: now = time(NULL)  */
+
+	newyear = *localtime(&now);
+
+	newyear.tm_hour = 0; newyear.tm_min = 0; newyear.tm_sec = 0;
+	newyear.tm_mon = 0;  newyear.tm_mday = 1;
+
+	seconds = difftime(now, mktime(&newyear));//from 2000s
 	t[strlen(t) - 1] = '\0';
 	string content;
 	cout << "type something that's sweet to your friend" << endl;
 	cin.ignore();
 	getline(cin, content);
-	string query2 = "insert into message(sender,receiver,contents,time) values(" + to_string(user1) + "," + to_string(user2) + ",'" + content + "', '" + t + "');";
+	string query2 = "insert into message(sender,receiver,contents,time,time_by_seconds) values(" + to_string(user1) + "," + to_string(user2) + ",'" + content + "', '" + t + "',"+to_string((int)seconds)+");";
 	if (!pSQLite->OpenConnection("chatapp.db", "C:\\Users\\8570w\\source\\repos\\chat_app\\chat_app\\")) {
 		cout << "Unable to connect database" << endl;
 		cout << pSQLite->GetLastError().c_str() << endl;

@@ -1,0 +1,7 @@
+﻿  veiw.cpp
+c:\users\8570w\source\repos\chat_app\chat_app\users_management.h(124): warning C4018: '<': signed/unsigned mismatch
+c:\users\8570w\source\repos\chat_app\chat_app\users_management.h(108): warning C4715: 'users_management::login': not all control paths return a value
+c:\users\8570w\source\repos\chat_app\chat_app\users_management.h(63): warning C4715: 'users_management::check_user': not all control paths return a value
+c:\users\8570w\source\repos\chat_app\chat_app\friend_list_management.h(70): warning C4715: 'friend_list_management::check_user': not all control paths return a value
+c:\users\8570w\source\repos\chat_app\chat_app\message_management.h(75): warning C4715: 'message_management::check_user': not all control paths return a value
+  chat_app.vcxproj -> C:\Users\8570w\source\repos\chat_app\Debug\chat_app.exe
